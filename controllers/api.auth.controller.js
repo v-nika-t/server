@@ -5,9 +5,15 @@ const privateKey = fs.readFileSync('./private.key',"utf-8");
 
 const service= require('../services/user.service');
 
+
 class AuthController {
     db = service;
+    form = (req, res) => {
+        res.status(200).json(req.files);
+    }
+    
     signUp = (req, res) => {
+
         bcrypt.hash(req.body.password, 10 , (err,hash) => {
             req.body.password = hash;
             this.db.addUser(req, res).then((data) => {
@@ -15,7 +21,7 @@ class AuthController {
                 res.status(200).json(data)
             });
         });
-        
+    
     };
 
     signIn = (req, res) => {
