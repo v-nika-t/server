@@ -1,56 +1,56 @@
-const db = require('../modules/users');
+const bcrypt = require('bcrypt');
+const User = require('../modules/users.MongoDB');
+const validateSchema = require('../validation-schemes/registration');
+
 
 class UserService {
-    
-    getAllUsers = (req, res) => {
-        return db.findAll({raw:true}).then(data => data);
+    getAllUsers = (req, res) => { 
+        return User.find().then(data => data);
     };
 
-   addUser = (req, res) => {
-        return (db
-                    .create (
-                        {name:req.body.name,mail:req.body.mail, password:req.body.password}
-                        )
-                    .then(data => data) );
+   addUser = (req, res) => { 
+      try{
+          validateSchema.validateAsync(req.body);
+          
+            return (new User({name:req.body.name,mail:req.body.mail, password:req.body.password})
+                        .save()
+                        .then(data => data)
+                        .catch(err => err) 
+                    );
+                        
+        } catch (err) { return err }
     };
 
-    editUser = (req, res) => {
-        let newData =  { 
-            'id': req.params.id,
-            'name':req.body.name, 
-            'mail':req.body.mail, 
-            'password':req.body.password }
-        
-        return db
-                .update({newData},{
-                    where: { 
-                        id: newData['id']
-                    },
-                }
-                ).then(() => newData );
-        }
+    editUser = (req, res) => { 
+        try{
+            validateSchema.validateAsync(req.body);
+            
+            let newData =  { 
+                'name':req.body.name, 
+                'mail':req.body.mail, 
+                'password':req.body.password }
 
-    getUser = (req, res) => {
-        return db
-            .findAll({ where: { id: req.params.id }, raw: true })
+            return ( User.findByIdAndUpdate(req.params.id, newData)
+                         .then(() => newData ) );
+        } catch (err) { }
+    }
+
+    getUser = (req, res) => { 
+        return User
+            .findById(req.params.id)
             .then((data) => data);
     };
 
     getUserByEmail = (req, res) => {
-        return db
-            .findAll({ where: { mail: req.body.mail }, raw: true })
+        return User
+            .findOne({mail: req.body.mail })
             .then((data) => data);
     };
 
-    deleteUser = (req, res) => {
-        return db
-            .destroy({
-                where: { 
-                    id: req.params.id
-                } 
-            }).then(() => req.params.id);
+    deleteUser = (req, res) => { 
+        return User.findByIdAndDelete(req.params.id)
+                   .then(() => req.params.id);
     }; 
 }
-
 
 module.exports =  new UserService;

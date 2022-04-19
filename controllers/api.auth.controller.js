@@ -5,23 +5,30 @@ const privateKey = fs.readFileSync('./private.key',"utf-8");
 
 const service= require('../services/user.service');
 
+
 class AuthController {
     db = service;
+    form = (req, res) => {
+        res.status(200).json(req.files);
+    }
+    
     signUp = (req, res) => {
+
         bcrypt.hash(req.body.password, 10 , (err,hash) => {
             req.body.password = hash;
             this.db.addUser(req, res).then((data) => {
+                console.log(data);
                 res.header('authorization', jwt.sign({id: data.id}, privateKey));
                 res.status(200).json(data)
             });
         });
-        
+    
     };
 
     signIn = (req, res) => {
         this.db.getUserByEmail(req, res)
-        .then((data) => { 
-            bcrypt.compare(req.body.password, data[0]['password'], (err, result) => {
+        .then((data) => {
+            bcrypt.compare(req.body.password, data['password'], (err, result) => {
                 if( result ) {
                     res.header('authorization', jwt.sign({id: data.id}, privateKey));
                     res.status(200).json({
@@ -36,7 +43,10 @@ class AuthController {
         };
 
     editUser = (req, res) => {
-        this.db.editUser(req, res).then((data) => res.status(200).json(data));
+        bcrypt.hash(req.body.password, 10 , (err,hash) => {
+            req.body.password = hash;
+            this.db.editUser(req, res).then((data) => res.status(200).json(data));
+        })
     };
 
     deleteUser = (req, res) => {
