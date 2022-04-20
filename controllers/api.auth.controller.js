@@ -8,21 +8,16 @@ const service= require('../services/user.service');
 
 class AuthController {
     db = service;
+
     form = (req, res) => {
         res.status(200).json(req.files);
     }
     
     signUp = (req, res) => {
-
-        bcrypt.hash(req.body.password, 10 , (err,hash) => {
-            req.body.password = hash;
-            this.db.addUser(req, res).then((data) => {
-                console.log(data);
-                res.header('authorization', jwt.sign({id: data.id}, privateKey));
-                res.status(200).json(data)
-            });
+        this.db.addUser(req, res).then((data) => {
+            res.header('authorization', jwt.sign({id: data.id}, privateKey));
+            res.status(200).json(data)
         });
-    
     };
 
     signIn = (req, res) => {
@@ -35,7 +30,7 @@ class AuthController {
                         data
                     })
                 } else {
-                    res.status(401).json("not correct date");
+                    res.status(404).json("not correct date");
                 }
             })
         })

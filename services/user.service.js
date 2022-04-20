@@ -8,30 +8,40 @@ class UserService {
         return User.find().then(data => data);
     };
 
-   addUser = (req, res) => { 
+   addUser =  (req, res) => { 
       try{
           validateSchema.validateAsync(req.body);
+            return (
+                bcrypt.hash(req.body.password, 10 )
+                    .then(hash => { 
+                        return ( 
+                            new User({ name:req.body.name,mail:req.body.mail, password:hash })
+                                .save() 
+                                ) 
+                        })
+                    .then(data => data)
+                    .catch(err => err) 
+            )
           
-            return (new User({name:req.body.name,mail:req.body.mail, password:req.body.password})
-                        .save()
-                        .then(data => data)
-                        .catch(err => err) 
-                    );
-                        
         } catch (err) { return err }
-    };
-
+    }
+    
     editUser = (req, res) => { 
         try{
             validateSchema.validateAsync(req.body);
-            
-            let newData =  { 
-                'name':req.body.name, 
-                'mail':req.body.mail, 
-                'password':req.body.password }
+            return (
+                bcrypt.hash(req.body.password, 10 )
+                    .then(hash => { 
+                        return  { 
+                            'name':req.body.name, 
+                            'mail':req.body.mail, 
+                            'password':hash
+                        }
+                    })
+                    .then(newData => User.findByIdAndUpdate(req.params.id, newData) )
+                    .then( newData => newData )
+            )
 
-            return ( User.findByIdAndUpdate(req.params.id, newData)
-                         .then(() => newData ) );
         } catch (err) { }
     }
 

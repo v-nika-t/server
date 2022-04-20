@@ -1,5 +1,4 @@
 const service= require('../services/user.service');
-const bcrypt = require('bcrypt');
 
 class UsersController {
     db = service;
@@ -9,17 +8,13 @@ class UsersController {
     };
 
     addUser = (req, res) => {
-        let a = bcrypt.hash(req.body.password, 10 , (err,hash) => {
-            req.body.password = hash;
-            this.db.addUser(req, res).then((data) => res.status(200).json(data));
-        })
+            this.db.addUser(req, res).then((data) => {res.status(200).json(data)}) ;
+        
     };
 
     editUser = (req, res) => {
-        bcrypt.hash(req.body.password, 10 , (err,hash) => {
-            req.body.password = hash;
             this.db.editUser(req, res).then((data) => res.status(200).json(data));
-        })
+        
     };
 
     getEditUser = (req, res) => {

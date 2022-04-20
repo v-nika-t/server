@@ -4,8 +4,8 @@ const express = require('express');
 const route = express.Router();
 const auth = require( "../middleware/auth");
 
-const upload = require('../middleware/multerProperties');
-const arrayNames= upload.fields([{ name: 'test_1' }, { name: 'test_2' }]);
+const upload = require(path.resolve(__dirname,'../middleware/multerProperties'));
+const arrayNames= upload.fields([{ name: 'test_1' }, { name: 'test_2' }]) ;
 
 route
     .use(auth)
