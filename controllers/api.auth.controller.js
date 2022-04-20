@@ -13,15 +13,10 @@ class AuthController {
     }
     
     signUp = (req, res) => {
-
-        bcrypt.hash(req.body.password, 10 , (err,hash) => {
-            req.body.password = hash;
-            this.db.addUser(req, res).then((data) => {
-                res.header('authorization', jwt.sign({id: data.id}, privateKey));
-                res.status(200).json(data)
-            });
+        this.db.addUser(req, res).then((data) => {
+            res.header('authorization', jwt.sign({id: data.id}, privateKey));
+            res.status(200).json(data)
         });
-    
     };
 
     signIn = (req, res) => {

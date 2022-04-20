@@ -1,7 +1,3 @@
-const multer = require('multer');
-const upload = multer({ dest: 'files/' }); 
-
-
 const PORT = 3000;
 
 const methodOverride = require('method-override');

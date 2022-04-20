@@ -1,6 +1,7 @@
 const db = require('../modules/users');
 const { v4: uuidv4 } = require('uuid');
 const validateSchema = require('../validation-schemes/registration');
+const bcrypt = require('bcrypt');
 
 class UserService {
     getAllUsers = (req, res) => {
@@ -10,12 +11,15 @@ class UserService {
    addUser = (req, res) => {
 
       try{
-          validateSchema.validateAsync(req.body);
-            return (db
-                        .create (
-                            {id:uuidv4(),name:req.body.name,mail:req.body.mail, password:req.body.password}
-                            )
-                        .then(data => data) );
+        validateSchema.validateAsync(req.body);
+        return (
+            bcrypt.hash(req.body.password, 10)
+                  .then(hash => { return ( db.create (
+                        {id:uuidv4(), name:req.body.name, mail:req.body.mail, password: hash}) 
+                                         )
+                    })
+                    .then(data => data)           
+            );
                         
         } catch (err) { return err }
     };
@@ -23,21 +27,22 @@ class UserService {
     editUser = (req, res) => {
         try{
             validateSchema.validateAsync(req.body);
-            
-            let newData =  { 
-                'id': req.params.id,
-                'name':req.body.name, 
-                'mail':req.body.mail, 
-                'password':req.body.password }
-                console.log(newData);
-                
-            return (db
-                    .update( newData,{
-                        where: { 
-                            id: newData['id']
-                        }
-                    }
-                    ).then(() => newData ) );
+            return (
+                bcrypt.hash(req.body.password, 10 )
+                    .then(hash => { 
+                        return  ( { 
+                            'id': req.params.id,
+                            'name':req.body.name, 
+                            'mail':req.body.mail, 
+                            'password':hash
+                        } )
+                    })
+                    .then(async newData => {
+                        await db.update(newData, { where: {id: newData['id']} }).then(data => console.log(data));
+                        return await newData;
+                    })
+                    .then(data => data)
+            )
         } catch (err) { }
     }
 
