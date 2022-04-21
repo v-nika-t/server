@@ -7,6 +7,10 @@ class UsersController {
       this.db.getAllUsers().then((data) => res.status(200).json(data));
     };
 
+    form = (req, res) => {
+        res.status(200).json(req.files);
+    }
+    
     addUser = (req, res) => {
         this.db.addUser(req, res).then((data) => res.status(200).json(data));
     };
