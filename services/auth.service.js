@@ -45,12 +45,16 @@ class AuthService {
         )   
     }
 
-    verifyUser = (req, res) => {
-        return ( jwt.verify(req.headers.authorization, privateKey, (err, payload) => {
-                    if(!err) { return User.findAll({where:{id: payload.id}, raw: true})
-                                          .then( data  => data)}
-                  })  
-                )
+    verify = (req, res) => {
+       return (jwt.verify(req.headers.authorization, privateKey, (err, payload) => {
+                if(!err) { return User.findAll({where:{id: payload.id}, raw: true}) }
+                else {
+                    return new Promise((res, rej) => {res('User not found') })
+                } 
+            }).then(data => data)
+                .catch(err => err)
+            )
+               
     }
 }
 module.exports =  new AuthService;
